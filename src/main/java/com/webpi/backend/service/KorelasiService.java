@@ -34,8 +34,6 @@ public class KorelasiService {
         korelasi.setNamaKasus(dto.getNamaKasus());
         korelasi.setNamaVarX(dto.getNamaVarX());
         korelasi.setNamaVarY(dto.getNamaVarY());
-        korelasi.setHo(dto.getHo());
-        korelasi.setHa(dto.getHa());
         korelasi.setAlpha(dto.getAlpha());
         korelasi.setN(xValues.size());
 
@@ -54,18 +52,15 @@ public class KorelasiService {
 
     public KorelasiResponseDTO getKorelasiById(Long id) {
         TabelKorelasi korelasi = korelasiRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Korelasi tidak ditemukan"));
+                .orElseThrow(() -> new RuntimeException("Korelasi tidak ditemukan"));
 
         List<TabelVariabel> variabelList = variabelRepository.findByKorelasiIdKorelasi(id);
 
         KorelasiResponseDTO response = new KorelasiResponseDTO();
-        
         response.setIdKorelasi(korelasi.getIdKorelasi());
         response.setNamaKasus(korelasi.getNamaKasus());
         response.setNamaVarX(korelasi.getNamaVarX());
         response.setNamaVarY(korelasi.getNamaVarY());
-        response.setHo(korelasi.getHo());
-        response.setHa(korelasi.getHa());
         response.setAlpha(korelasi.getAlpha());
         response.setN(korelasi.getN());
 
