@@ -10,7 +10,7 @@ import java.util.List;
 public class TabelAnova {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idAnova;
+    private Long idAnova;
 
     @Column(columnDefinition = "TEXT")
     private String namaKasus;
