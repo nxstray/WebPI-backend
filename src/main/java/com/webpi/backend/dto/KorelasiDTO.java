@@ -9,8 +9,6 @@ public class KorelasiDTO {
     private String namaKasus;
     private String namaVarX;
     private String namaVarY;
-    private String ho;
-    private String ha;
     private Double alpha;
     private String inputMethod;
 

@@ -1,5 +1,6 @@
 package com.webpi.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.util.List;
 
@@ -9,10 +10,12 @@ public class KorelasiResponseDTO {
     private String namaKasus;
     private String namaVarX;
     private String namaVarY;
-    private String ho;
-    private String ha;
     private Double alpha;
     private Integer n;
+
+    @JsonProperty("xValues")
     private List<Double> xValues;
+
+    @JsonProperty("yValues")
     private List<Double> yValues;
 }
