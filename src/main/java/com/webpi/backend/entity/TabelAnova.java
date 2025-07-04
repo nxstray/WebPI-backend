@@ -16,8 +16,6 @@ public class TabelAnova {
     private String namaKasus;
 
     private String namaVarY;
-    private String ho;
-    private String ha;
     private Double alpha;
     private String inputMethod;
 
