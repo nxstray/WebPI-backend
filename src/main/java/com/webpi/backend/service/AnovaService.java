@@ -24,8 +24,6 @@ public class AnovaService {
         TabelAnova anova = new TabelAnova();
         anova.setNamaKasus(dto.getNamaKasus());
         anova.setNamaVarY(dto.getNamaVariabelDependen());
-        anova.setHo(dto.getHo());
-        anova.setHa(dto.getHa());
         anova.setAlpha(dto.getAlpha());
         anova.setInputMethod(dto.getInputMethod());
 
@@ -61,8 +59,6 @@ public class AnovaService {
         response.setIdAnova(anova.getIdAnova());
         response.setNamaKasus(anova.getNamaKasus());
         response.setNamaVarY(anova.getNamaVarY());
-        response.setHo(anova.getHo());
-        response.setHa(anova.getHa());
         response.setAlpha(anova.getAlpha());
         response.setInputMethod(anova.getInputMethod());
         response.setGrups(grupDTOList);
