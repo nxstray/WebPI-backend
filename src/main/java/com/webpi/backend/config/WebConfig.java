@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("https://*.vercel.app")
+                        .allowedOriginPatterns("https://webpi-frontend-hut7tdapl-nxstrays-projects.vercel.app/")
                         .allowedMethods("*");
             }
         };
