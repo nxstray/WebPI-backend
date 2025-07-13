@@ -14,12 +14,10 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns(
-                            "https://webpi-frontend.vercel.app",
-                            "http://localhost:4200"
-                        )
-                        .allowedMethods("*")
-                        .allowCredentials(true);
+                        .allowedOrigins("http://localhost:4200", "https://webpi-frontend.vercel.app")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .maxAge(3600);
             }
         };
     }
