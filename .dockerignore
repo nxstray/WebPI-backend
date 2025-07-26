@@ -1,13 +1,34 @@
+# Abaikan seluruh folder target (hasil build Java)
 target/
+
+# Izinkan file wrapper Maven agar tetap diikutkan dalam konteks build
 !.mvn/wrapper/maven-wrapper.jar
+
+# Abaikan seluruh folder .mvn (kecuali file jar wrapper di atas)
 .mvn/
+
+# Abaikan folder konfigurasi IntelliJ IDEA
 .idea/
+
+# Abaikan file project IntelliJ IDEA
 *.iml
+
+# Abaikan semua file log
 *.log
+
+# Abaikan file Markdown (biasanya README, catatan, dll.)
 *.md
+
+# Abaikan folder dan file konfigurasi Git
 .git
 .gitignore
+
+# Abaikan file Docker dan konfigurasi docker-compose (jika tak ingin disertakan dalam konteks Docker)
 Dockerfile
 docker-compose.yml
+
+# Abaikan folder node_modules (umumnya pada proyek frontend atau fullstack)
 node_modules
+
+# Abaikan file konfigurasi environment yang bersifat rahasia
 .env
