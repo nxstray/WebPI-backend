@@ -50,10 +50,10 @@ public class AnovaController {
             }
             log.info("=============================");
 
-            // Validasi manual input
+            // Validasi basic manual input
             if (dto.getNamaGrup() == null || dto.getNilaiGrup() == null ||
                     dto.getNamaGrup().isEmpty() || dto.getNilaiGrup().isEmpty()) {
-                return ResponseEntity.badRequest().body(new ErrorResponse("Eits, pastikan semua field terisi dengan benar ya!."));
+                return ResponseEntity.badRequest().body(new ErrorResponse("Eits, pastikan semua field terisi dengan benar ya!"));
             }
             
             if (dto.getNamaGrup().size() != dto.getNilaiGrup().size()) {
@@ -93,49 +93,103 @@ public class AnovaController {
         try {
             log.info("=== EXCEL ANOVA REQUEST ===");
             log.info("File: {}", file.getOriginalFilename());
+            log.info("File size: {} bytes", file.getSize());
             log.info("JSON Data: {}", jsonData);
             
-            AnovaDTO frontendData = objectMapper.readValue(jsonData, AnovaDTO.class);
-            log.info("Parsed frontend data: {}", frontendData);
-            log.info("namaVariableIndependen: '{}'", frontendData.getNamaVariableIndependen());
-            log.info("===========================");
-
-            // Validasi file Excel
+            // Validasi file Excel terlebih dahulu
             if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body(new ErrorResponse("File Excel tidak ditemukan."));
+                return ResponseEntity.badRequest().body(new ErrorResponse("File Excel tidak ditemukan atau kosong."));
+            }
+            
+            // Validasi tipe file
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || 
+                (!originalFilename.toLowerCase().endsWith(".xlsx") && 
+                 !originalFilename.toLowerCase().endsWith(".xls"))) {
+                return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Format file tidak didukung. Gunakan file Excel (.xlsx atau .xls)")
+                );
+            }
+            
+            // Validasi ukuran file (misalnya max 10MB)
+            if (file.getSize() > 10 * 1024 * 1024) {
+                return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Ukuran file terlalu besar. Maksimal 10MB.")
+                );
             }
 
-            // Handle Excel upload dengan data dari frontend - mirip KorelasiService
+            // Parse JSON data dari frontend
+            AnovaDTO frontendData;
+            try {
+                frontendData = objectMapper.readValue(jsonData, AnovaDTO.class);
+            } catch (IOException e) {
+                log.error("JSON parsing error: {}", e.getMessage());
+                return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Format data JSON tidak valid: " + e.getMessage())
+                );
+            }
+            
+            log.info("Parsed frontend data: {}", frontendData);
+            log.info("namaKasus: '{}'", frontendData.getNamaKasus());
+            log.info("namaVariableDependen: '{}'", frontendData.getNamaVariableDependen());
+            log.info("namaVariableIndependen: '{}'", frontendData.getNamaVariableIndependen());
+            log.info("alpha: {}", frontendData.getAlpha());
+            log.info("===========================");
+
+            // Handle Excel upload dengan data dari frontend
             TabelAnova hasil = anovaService.handleExcelUpload(file, frontendData);
             
             // Return dengan ID untuk frontend
-            return ResponseEntity.ok(new SuccessResponse(hasil.getIdAnova(), "Excel berhasil diproses"));
-            
-        } catch (IOException e) {
-            log.error("JSON parsing error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(new ErrorResponse("Gagal membaca data JSON: " + e.getMessage()));
+            return ResponseEntity.ok(new SuccessResponse(hasil.getIdAnova(), "Excel berhasil diproses dan data disimpan"));
             
         } catch (IllegalArgumentException e) {
-            // Return 400 Bad Request dengan pesan validasi
+            // Error dari validasi atau parsing Excel
             log.warn("Excel validation error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
             
         } catch (Exception e) {
+            // Error tak terduga
             log.error("Unexpected error processing Excel upload:", e);
+            
+            // Cek apakah error terkait file Excel yang corrupt
+            if (e.getMessage() != null && 
+                (e.getMessage().contains("Invalid header signature") ||
+                 e.getMessage().contains("unable to read signature") ||
+                 e.getMessage().contains("corrupted"))) {
+                return ResponseEntity.badRequest().body(
+                    new ErrorResponse("File Excel rusak atau tidak valid. Silakan coba file Excel yang lain.")
+                );
+            }
+            
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("Terjadi kesalahan server: " + e.getMessage()));
+                .body(new ErrorResponse("Terjadi kesalahan server saat memproses Excel: " + e.getMessage()));
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AnovaResponseDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<?> getById(@PathVariable Long id) {
         try {
             log.info("Fetching anova with ID: {}", id);
+            
+            // Validasi ID
+            if (id == null || id <= 0) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("ID tidak valid"));
+            }
+            
             AnovaResponseDTO response = anovaService.getAnovaById(id);
+            log.info("Successfully retrieved ANOVA data with ID: {}", id);
+            
             return ResponseEntity.ok(response);
+            
         } catch (RuntimeException e) {
             log.error("Anova not found with ID: {}", id);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("Data ANOVA dengan ID " + id + " tidak ditemukan"));
+                
+        } catch (Exception e) {
+            log.error("Unexpected error fetching ANOVA with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("Terjadi kesalahan server: " + e.getMessage()));
         }
     }
 
